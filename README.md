@@ -2,7 +2,7 @@
 
 Interactive decision tree for designing Measurement & Verification (M&V) plans using the **Counterfactual Designs** framework — Boundary, Model Form, and Duration instead of protocol labels.
 
-**[Live on Replit](https://replit.com/join/xeaxrorbvx-jskromer)**
+**[Live App](https://mv-decision-tree--jskromer.replit.app)** · [View on Replit](https://replit.com/join/xeaxrorbvx-jskromer)
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/jskromer/mv-decision-tree/main/app.py)
 [![Run on Replit](https://replit.com/badge?caption=Run%20on%20Replit)](https://replit.com/github/jskromer/mv-decision-tree)
