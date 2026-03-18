@@ -138,13 +138,29 @@ def build_recommendation():
         )
 
     # --- Model Form ---
-    if boundary_access == "Calibrated simulation model available or feasible":
+    if (boundary_access == "Calibrated simulation model available or feasible"
+            or baseline_data == "Little or no pre-intervention data"):
         model_form = "Engineering / physical simulation model"
-        model_note = (
-            "Construct the counterfactual using a calibrated energy simulation "
-            "(e.g., EnergyPlus, eQUEST). The model represents physics-based "
-            "relationships and can handle complex interactions."
-        )
+        if boundary_access == "Calibrated simulation model available or feasible":
+            model_note = (
+                "Construct the counterfactual using a calibrated energy simulation "
+                "(e.g., EnergyPlus, eQUEST). The model represents physics-based "
+                "relationships and can handle complex interactions."
+            )
+        else:
+            model_note = (
+                "Without pre-intervention data, a statistical counterfactual has no "
+                "foundation. A calibrated simulation is the recommended path — it can "
+                "construct the baseline from building characteristics and physics-based "
+                "relationships rather than historical metered data."
+            )
+        # Also update boundary when simulation is driven by data gap
+        if baseline_data == "Little or no pre-intervention data" and boundary != "Whole-building (simulation-defined boundary)":
+            boundary = "Whole-building (simulation-defined boundary)"
+            boundary_note = (
+                "Insufficient baseline data requires a simulation-based counterfactual. "
+                "The simulation defines the measurement boundary across the building."
+            )
     elif load_variability == "Constant or near-constant load (e.g., lighting, base-load motors)":
         if budget_accuracy == "Minimize cost — stipulated values acceptable where defensible":
             model_form = "Stipulated key-parameter model"
@@ -204,20 +220,12 @@ def build_recommendation():
             "uncertainty in the savings estimate."
         )
     else:
-        # Little or no baseline data
-        if boundary_access == "Calibrated simulation model available or feasible":
-            duration = "Simulation-derived baseline — reporting period data validates model"
-            duration_note = (
-                "With no measured baseline, the simulation model defines the "
-                "counterfactual. Use reporting-period data to validate model calibration."
-            )
-        else:
-            duration = "Insufficient baseline — consider simulation or deferred analysis"
-            duration_note = (
-                "Without pre-intervention data, a statistical counterfactual has no "
-                "foundation. Consider a calibrated simulation, or begin collecting "
-                "reporting-period data and design a post-only comparison if feasible."
-            )
+        # Little or no baseline data — simulation is now the recommended path
+        duration = "Simulation-derived baseline — reporting period data validates model"
+        duration_note = (
+            "With no measured baseline, the simulation model defines the "
+            "counterfactual. Use reporting-period data to validate model calibration."
+        )
 
     # --- Signal-to-noise warning ---
     signal_note = None
@@ -305,6 +313,7 @@ dot.edge("Q4", "T_NARROW", label="No — signal\ntoo small")
 
 dot.edge("Q5", "T_WB_MULTI", label="12+ months\navailable")
 dot.edge("Q5", "T_EQ_REG", label="Limited data —\nsimplify model")
+dot.edge("Q5", "T_SIM", label="No baseline data —\nuse simulation")
 
 # Highlight the recommended terminal node based on model_rec
 highlight_map = {
@@ -393,50 +402,6 @@ These are patterns, not rigid categories. Mix dimensions as the project demands.
 """)
 
 
-# ─── IPMVP Inconsistencies (Educational Context) ─────────────────────────────
-
-with st.expander("IPMVP Known Inconsistencies & Why CfD Resolves Them"):
-    st.markdown("""
-*The following issues are drawn from a critical reading of the IPMVP Core Concepts
-document. They illustrate why a design-based framework (Boundary, Model Form, Duration)
-is more transparent than protocol labels.*
-
-**1. Adjusted Baseline Energy — contradictory definition vs. equation**
-The glossary includes Non-Routine Adjustments (NRAs) in "Adjusted Baseline Energy,"
-but Equation 4 treats NRAs as a separate term. Following the glossary vs. the equation
-yields different savings calculations.
-
-> *CfD resolution:* Adjustments are explicit model inputs, not definitional ambiguities.
-> The counterfactual model either includes or excludes each factor — document the choice.
-
-**2. "Option A" vs. "Option B" — measurement frequency ambiguity**
-IPMVP uses *identical* language for both: "short-term to continuous."
-The typical "Option B" example shows continuous metering, but the formal definition
-doesn't require it.
-
-> *CfD resolution:* Duration is an explicit design dimension. State how much data you
-> need and why — there is no label to hide behind.
-
-**3. "Option D" is not strictly "retrofit isolation"**
-Section 5.1 groups "Option D" with A and B as a "retrofit-isolation technique,"
-but simulation models whole-facility energy.
-
-> *CfD resolution:* Boundary and Model Form are independent dimensions. A simulation
-> can serve any boundary — equipment, system, or whole building. No conflation.
-
-**4. "Savings" definition excludes simulation-derived values**
-The glossary requires "measured" energy values. Simulation replaces measured data.
-
-> *CfD resolution:* The counterfactual is always an estimate — whether from a regression
-> or a simulation. The framework treats all model forms as constructions, not measurements.
-
-**5. Conservative ≠ Accurate**
-IPMVP's conservatism principle (don't overstate savings) introduces directional bias.
-Systematically under-reporting savings is a form of inaccuracy.
-
-> *CfD resolution:* Report best-estimate savings with explicit uncertainty bounds.
-> Let stakeholders decide how to use the confidence interval — don't bake bias into the method.
-""")
 
 # ─── Footer ──────────────────────────────────────────────────────────────────
 
